@@ -1,5 +1,6 @@
 const axios = require('axios');
 const config = require('../config');
+const { debugPractitionerNik } = require('../services/debugService');
 const { registerPatient } = require('../services/registrationService');
 const { getPatientByNik } = require('../services/patientService');
 const { getPractitionerByNik } = require('../services/practitionerService');
@@ -97,6 +98,17 @@ const postEncounter = async (req, res, next) => {
   }
 };
 
+// GET /api/v1/satusehat/debug/practitioner-nik/:nik — Coba semua format identifier
+const debugPractitioner = async (req, res, next) => {
+  try {
+    const { nik } = req.params;
+    const results = await debugPractitionerNik(nik);
+    return sendSuccess(res, results, 'Debug: hasil semua percobaan identifier');
+  } catch (err) {
+    next(err);
+  }
+};
+
 // GET /api/v1/satusehat/debug/practitioner?name=... — Cari practitioner by name (debug)
 const debugSearchPractitioner = async (req, res, next) => {
   try {
@@ -135,5 +147,6 @@ module.exports = {
   getPractitioner,
   postLocation,
   postEncounter,
+  debugPractitioner,
   debugSearchPractitioner,
 };

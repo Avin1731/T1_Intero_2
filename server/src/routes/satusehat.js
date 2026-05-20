@@ -6,6 +6,7 @@ const {
   getPractitioner,
   postLocation,
   postEncounter,
+  debugPractitioner,
   debugSearchPractitioner,
 } = require('../controllers/registrationController');
 
@@ -15,6 +16,8 @@ router.get('/practitioner/:nik', getPractitioner);
 router.post('/location', postLocation);
 router.post('/encounter', postEncounter);
 
+// Debug: coba semua format identifier untuk NIK tertentu
+router.get('/debug/practitioner-nik/:nik', debugPractitioner);
 // Debug: cari practitioner by name atau list semua
 router.get('/debug/practitioner', debugSearchPractitioner);
 
