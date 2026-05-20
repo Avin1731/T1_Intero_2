@@ -104,9 +104,8 @@ const debugSearchPractitioner = async (req, res, next) => {
     const token = await getAccessToken();
     const FHIR_BASE = `${config.satusehat.baseUrl}/fhir-r4/v1`;
 
-    const params = name ? { name } : { _count: 10 };
-    const response = await axios.get(`${FHIR_BASE}/Practitioner`, {
-      params,
+    const queryString = name ? `name=${encodeURIComponent(name)}` : `_count=10`;
+    const response = await axios.get(`${FHIR_BASE}/Practitioner?${queryString}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

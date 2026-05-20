@@ -11,10 +11,12 @@ const FHIR_BASE = `${config.satusehat.baseUrl}/fhir-r4/v1`;
 const getPatientByNik = async (nik) => {
   const token = await getAccessToken();
 
+  // Kirim URL raw (tanpa encode) agar sama persis dengan format Postman SATUSEHAT
+  const url = `${FHIR_BASE}/Patient?identifier=https://fhir.kemkes.go.id/id/nik|${nik}`;
+
   let response;
   try {
-    response = await axios.get(`${FHIR_BASE}/Patient`, {
-      params: { identifier: `https://fhir.kemkes.go.id/id/nik|${nik}` },
+    response = await axios.get(url, {
       headers: { Authorization: `Bearer ${token}` },
     });
   } catch (err) {
