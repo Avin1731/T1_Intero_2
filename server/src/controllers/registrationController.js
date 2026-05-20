@@ -1,3 +1,5 @@
+const axios = require('axios');
+const config = require('../config');
 const { registerPatient } = require('../services/registrationService');
 const { getPatientByNik } = require('../services/patientService');
 const { getPractitionerByNik } = require('../services/practitionerService');
@@ -95,6 +97,38 @@ const postEncounter = async (req, res, next) => {
   }
 };
 
+// GET /api/v1/satusehat/debug/practitioner?name=... — Cari practitioner by name (debug)
+const debugSearchPractitioner = async (req, res, next) => {
+  try {
+    const { name } = req.query;
+    const token = await getAccessToken();
+    const FHIR_BASE = `${config.satusehat.baseUrl}/fhir-r4/v1`;
+
+    const params = name ? { name } : { _count: 10 };
+    const response = await axios.get(`${FHIR_BASE}/Practitioner`, {
+      params,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const bundle = response.data;
+    const entries = (bundle.entry || []).map((e) => {
+      const r = e.resource;
+      const nikIdentifier = r.identifier?.find(
+        (id) => id.system === 'https://fhir.kemkes.go.id/id/nik'
+      );
+      return {
+        ihsNumber: r.id,
+        name: r.name?.[0]?.text || r.name?.[0]?.family || '-',
+        nik: nikIdentifier?.value || '(tidak ada NIK)',
+      };
+    });
+
+    return sendSuccess(res, { total: bundle.total, practitioners: entries }, 'Debug: daftar practitioner');
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   register,
   getToken,
@@ -102,4 +136,5 @@ module.exports = {
   getPractitioner,
   postLocation,
   postEncounter,
+  debugSearchPractitioner,
 };

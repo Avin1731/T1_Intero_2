@@ -11,6 +11,9 @@ const FHIR_BASE = `${config.satusehat.baseUrl}/fhir-r4/v1`;
 const getPractitionerByNik = async (nik) => {
   const token = await getAccessToken();
 
+  const requestUrl = `${FHIR_BASE}/Practitioner?identifier=https://fhir.kemkes.go.id/id/nik|${nik}`;
+  console.log('[Practitioner] Request URL:', requestUrl);
+
   let response;
   try {
     response = await axios.get(`${FHIR_BASE}/Practitioner`, {
@@ -23,10 +26,12 @@ const getPractitionerByNik = async (nik) => {
       authErr.statusCode = 401;
       throw authErr;
     }
+    console.error('[Practitioner] API error:', err.response?.status, JSON.stringify(err.response?.data));
     throw err;
   }
 
   const bundle = response.data;
+  console.log('[Practitioner] Bundle total:', bundle.total, '| Entries:', bundle.entry?.length ?? 0);
 
   if (!bundle.entry || bundle.entry.length === 0) {
     const notFound = new Error(`Dokter dengan NIK ${nik} tidak ditemukan`);
