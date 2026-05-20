@@ -92,7 +92,7 @@ const options = {
         EncounterData: {
           type: 'object',
           properties: {
-            encounterId: { type: 'string', example: 'b3c4d5e6-f7a8-9012-bcde-f12345678901' },
+            encounterId: { type: 'string', example: 'f0222960-2633-435b-9776-753ba48cef78' },
             status: { type: 'string', example: 'arrived' },
           },
         },
@@ -169,7 +169,7 @@ const options = {
             patientIhsNumber: {
               type: 'string',
               description: 'IHS Number pasien dari hasil pencarian NIK',
-              example: 'P02478375538',
+              example: 'P02280547535',
             },
             patientName: {
               type: 'string',
@@ -178,7 +178,7 @@ const options = {
             practitionerIhsNumber: {
               type: 'string',
               description: 'IHS Number dokter dari hasil pencarian NIK',
-              example: 'N10000001',
+              example: '100009880728',
             },
             practitionerName: {
               type: 'string',
@@ -186,8 +186,8 @@ const options = {
             },
             locationId: {
               type: 'string',
-              description: 'ID Location yang dikembalikan dari endpoint POST /satusehat/location',
-              example: 'a2b3c4d5-e6f7-8901-abcd-ef1234567890',
+              description: 'ID Location dari endpoint POST /satusehat/location atau GET-or-CREATE',
+              example: 'ba7bd67f-93db-4ced-a5d6-7e79fdc7a6dd',
             },
             locationName: {
               type: 'string',
@@ -496,7 +496,9 @@ const options = {
             '**Nilai yang ditetapkan otomatis:**\n' +
             '- `status`: `arrived`\n' +
             '- `class`: `AMB` (Ambulatory / Rawat Jalan)\n' +
-            '- `period.start`: timestamp ISO 8601 UTC+0 saat request\n\n' +
+            '- `period.start`: timestamp ISO 8601 UTC+0 saat request\n' +
+            '- `identifier`: UUID unik per request (system: `http://sys-ids.kemkes.go.id/encounter/{orgId}`)\n' +
+            '- `statusHistory`: diisi otomatis sesuai status saat ini\n\n' +
             '`patientIhsNumber`, `practitionerIhsNumber`, dan `locationId` **wajib diisi**.\n\n' +
             '> Gunakan endpoint `POST /register` jika ingin menjalankan seluruh alur sekaligus.',
           operationId: 'createEncounter',
