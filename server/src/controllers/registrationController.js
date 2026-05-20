@@ -1,6 +1,6 @@
 const axios = require('axios');
 const config = require('../config');
-const { debugPractitionerNik } = require('../services/debugService');
+const { debugPractitionerNik, searchPractitionerByName } = require('../services/debugService');
 const { registerPatient } = require('../services/registrationService');
 const { getPatientByNik } = require('../services/patientService');
 const { getPractitionerByNik } = require('../services/practitionerService');
@@ -109,32 +109,12 @@ const debugPractitioner = async (req, res, next) => {
   }
 };
 
-// GET /api/v1/satusehat/debug/practitioner?name=... — Cari practitioner by name (debug)
+// GET /api/v1/satusehat/debug/practitioner?name=&birthdate=&gender= — Cari by nama+tgl lahir
 const debugSearchPractitioner = async (req, res, next) => {
   try {
-    const { name } = req.query;
-    const token = await getAccessToken();
-    const FHIR_BASE = `${config.satusehat.baseUrl}/fhir-r4/v1`;
-
-    const queryString = name ? `name=${encodeURIComponent(name)}` : `_count=10`;
-    const response = await axios.get(`${FHIR_BASE}/Practitioner?${queryString}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const bundle = response.data;
-    const entries = (bundle.entry || []).map((e) => {
-      const r = e.resource;
-      const nikIdentifier = r.identifier?.find(
-        (id) => id.system === 'https://fhir.kemkes.go.id/id/nik'
-      );
-      return {
-        ihsNumber: r.id,
-        name: r.name?.[0]?.text || r.name?.[0]?.family || '-',
-        nik: nikIdentifier?.value || '(tidak ada NIK)',
-      };
-    });
-
-    return sendSuccess(res, { total: bundle.total, practitioners: entries }, 'Debug: daftar practitioner');
+    const { name, birthdate, gender } = req.query;
+    const result = await searchPractitionerByName({ name, birthdate, gender });
+    return sendSuccess(res, result, 'Debug: hasil pencarian practitioner');
   } catch (err) {
     next(err);
   }
