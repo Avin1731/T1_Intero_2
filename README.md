@@ -119,3 +119,4 @@ Setiap direktori (`client` dan `server`) memiliki file `AGENTS.md` yang memuat k
 ---
 
 *Proyek ini dikembangkan untuk mendukung Interoperabilitas Data Kesehatan di Indonesia berdasarkan spesifikasi Kementerian Kesehatan.*
+
