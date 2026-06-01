@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Client README
 
-## Getting Started
+Frontend aplikasi SATUSEHAT Interoperability.
 
-First, run the development server:
+## Teknologi utama
+- Next.js 16.2.6
+- React 19.2.4
+- Tailwind CSS 4
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Tujuan
+Folder `client/` berisi antarmuka pengguna web yang akan berkomunikasi dengan backend `server/`.
+
+Catatan: untuk instruksi `clone` dan setup cepat (server + client), lihat `../README.md`.
+
+## Setup dan Jalan
+1. Buka terminal di folder `client`:
+   ```bash
+   cd client
+   ```
+2. Install dependensi:
+   ```bash
+   npm install
+   # atau
+   pnpm install
+   ```
+3. Jalankan aplikasi frontend:
+   ```bash
+   npm run dev
+   # atau
+   pnpm dev
+   ```
+4. Buka `http://localhost:3000` di browser.
+
+> Pastikan backend sudah berjalan terlebih dahulu di `http://localhost:5000`.
+
+## Status saat ini
+- Frontend masih menggunakan halaman starter default Next.js di `src/app/page.js`.
+- Belum ada integrasi API backend secara penuh; pengembangan UI dan panggilan API dapat dilanjutkan di folder `src/`.
+
+## Struktur file penting
+- `src/app/page.js` — halaman utama saat ini
+- `next.config.mjs` — konfigurasi Next.js
+- `postcss.config.mjs` — konfigurasi Tailwind CSS
+- `package.json` — script dan dependensi
+
+## Catatan untuk kontributor
+- Update UI di `src/app/*`.
+- Jika perlu memanggil backend, gunakan alamat lengkap `http://localhost:5000/api/v1/...`.
+- Baca `../README.md` untuk konteks proyek secara keseluruhan.
+
+## Panduan Commit Frontend
+Gunakan format commit ini untuk perubahan client:
+```text
+<type>@client: <deskripsi singkat>
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`type` yang direkomendasikan:
+- `feat` — fitur baru
+- `fix` — perbaikan bug
+- `docs` — dokumentasi
+- `refactor` — refactor kode tanpa fitur baru
+- `chore` — maintenance/dependensi/CI
+- `test` — tambahan atau perbaikan tes
+- `perf` — peningkatan performa
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Contoh:
+- `feat@client: tambah halaman pendaftaran pasien`
+- `fix@client: perbaiki tampilan responsif navbar`
+- `docs@client: update README client dan instruksi setup`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Jika perubahan juga menyentuh backend, gunakan `@client @server` atau pisahkan menjadi dua commit: satu untuk frontend, satu untuk backend.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Pesan commit harus detail namun ringkas: jelaskan apa yang berubah dan kenapa.
+ 

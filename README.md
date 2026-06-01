@@ -17,6 +17,31 @@ satusehat-website/
 └── README.md     # Dokumentasi ini
 ```
 
+## 📌 Apa yang ada di repo
+
+Root folder berisi:
+- `.git/` — metadata Git untuk repo
+- `README.md` — dokumentasi utama
+- `client/` — aplikasi frontend Next.js
+- `server/` — backend API Express
+
+### `client/`
+- `package.json` — konfigurasi paket dan skrip
+- `pnpm-lock.yaml` — lock file untuk pnpm
+- `src/app/` — kode aplikasi Next.js
+- `public/` — aset statis
+- `next.config.mjs`, `postcss.config.mjs` — konfigurasi Next/Tailwind
+- `AGENTS.md` — panduan arsitektur dan gaya kode frontend
+- `client/README.md` — panduan setup dan status frontend
+
+### `server/`
+- `package.json` — konfigurasi paket dan skrip server
+- `.env.example` — contoh konfigurasi environment
+- `server.js` — entry point server
+- `src/` — routes, controllers, services, dan util
+- `AGENTS.md` — panduan arsitektur dan gaya kode backend
+- `server/README.md` — panduan setup dan status backend
+
 ### Stack Teknologi
 
 **Client (Frontend):**
@@ -98,9 +123,41 @@ Frontend menyediakan antarmuka pengguna sistem.
    ```
 4. Buka [http://localhost:3000](http://localhost:3000) di browser Anda.
 
+## 🔌 Endpoint Backend Ringkas
+
+Backend saat ini menyediakan endpoint berikut:
+- `GET /api/v1/health`
+- `POST /api/v1/register`
+- `GET /api/v1/satusehat/token`
+- `GET /api/v1/satusehat/patient/:nik`
+- `GET /api/v1/satusehat/practitioner/:nik`
+- `POST /api/v1/satusehat/location`
+- `POST /api/v1/satusehat/encounter`
+- `GET /api/v1/satusehat/debug/practitioner-nik/:nik`
+- `GET /api/v1/satusehat/debug/practitioner`
+
+Catatan: server mengelola token OAuth2 SATUSEHAT secara otomatis dan menyimpannya dalam cache sampai hampir kadaluarsa.
+
 ## 📖 Dokumentasi API Backend
 
 Backend menggunakan modul `swagger-ui-express` dan `swagger-jsdoc` untuk memunculkan spesifikasi endpoint secara interaktif. Saat server berjalan, Anda dapat mengakses dokumentasi API melalui endpoint yang telah ditentukan (secara default di dokumentasi ini asumsikan di `/api/docs` atau yang telah dikonfigurasi).
+
+## ✅ Status Saat Ini
+
+### `client`
+- Struktur dasar Next.js sudah tersedia
+- Halaman awal masih menggunakan starter default di `client/src/app/page.js`
+- Belum ada integrasi API backend secara lengkap
+
+### `server`
+- Express, Swagger, dan OAuth2-ready middleware telah disiapkan
+- `server/.env` harus dibuat agar kredensial SATUSEHAT berfungsi
+- Struktur `src/` sudah ada: routes, controller, service, util
+
+### Koneksi client-server
+- Jalankan server dahulu, lalu frontend
+- Frontend belum otomatis memanggil backend saat ini
+- Integrasi akan berjalan setelah frontend ditambahkan panggilan ke endpoint `http://localhost:5000/api/v1/...`
 
 ## 🔒 Panduan dan Standar Pengembangan
 Setiap direktori (`client` dan `server`) memiliki file `AGENTS.md` yang memuat konvensi, arsitektur, dan panduan kode (seperti struktur *folder*, pola desain *Controller-Service-Route* untuk Express, dan pembaruan framework untuk Next.js). Sangat disarankan untuk membacanya sebelum berkontribusi.
@@ -110,11 +167,35 @@ Setiap direktori (`client` dan `server`) memiliki file `AGENTS.md` yang memuat k
 
 ## 🤝 Kontribusi
 
-1. *Fork* repositori ini
-2. Buat *branch* fitur Anda (`git checkout -b feature/FiturKeren`)
-3. *Commit* perubahan Anda (`git commit -m 'feat: menambahkan FiturKeren'`)
-4. *Push* ke branch (`git push origin feature/FiturKeren`)
-5. Buka sebuah *Pull Request*
+Sebelum commit, gunakan pesan yang jelas dan konsisten:
+
+```text
+<type>@<scope>: <deskripsi singkat>
+```
+
+`type` yang direkomendasikan:
+- `feat` — fitur baru
+- `fix` — perbaikan bug
+- `docs` — dokumentasi
+- `refactor` — perubahan kode tanpa fitur baru atau bug fix
+- `chore` — tugas maintenance/ci/dependensi
+- `test` — tambahan atau perbaikan tes
+- `perf` — peningkatan performa
+
+`scope` yang direkomendasikan:
+- `@client` — perubahan frontend
+- `@server` — perubahan backend
+- `@client @server` — perubahan lintas frontend dan backend
+
+Contoh:
+- `feat@client: tambah halaman login`
+- `fix@server: perbaiki error handling token`
+- `docs@client @server: update README setup`
+
+1. Buat *branch* fitur Anda (`git checkout -b feature/FiturKeren`)
+2. *Commit* perubahan Anda (`git commit -m 'feat@client: menambahkan FiturKeren'`)
+3. *Push* ke branch (`git push origin feature/FiturKeren`)
+4. Buka sebuah *Pull Request*
 
 ---
 
