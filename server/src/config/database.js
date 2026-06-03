@@ -23,8 +23,21 @@ const sequelize = new Sequelize({
 const connectDB = async () => {
   try {
     await sequelize.authenticate();
+    
+    // Load models
+    require('../models/EncounterRecord');
+    require('../models/Practitioner');
+    require('../models/Location');
+
     // sync({ alter: true }) — update tabel jika schema berubah, tidak hapus data
     await sequelize.sync({ alter: true });
+    
+    // Run seeders
+    const seedPractitioners = require('../seeders/practitionerSeeder');
+    const seedLocations = require('../seeders/locationSeeder');
+    await seedPractitioners();
+    await seedLocations();
+
     console.log(`[DB] SQLite siap: ${DB_PATH}`);
   } catch (err) {
     console.error('[DB] Gagal inisialisasi SQLite:', err.message);

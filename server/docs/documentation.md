@@ -2,7 +2,7 @@
 
 > **Base URL:** `http://localhost:5000/api/v1`
 > **Swagger UI:** `http://localhost:5000/api/docs`
-> **Stack:** Node.js · Express · MongoDB (Mongoose) · SATUSEHAT FHIR R4 Sandbox
+> **Stack:** Node.js · Express · SQLite (Sequelize) · SATUSEHAT FHIR R4 Sandbox
 
 ---
 
@@ -41,9 +41,9 @@ Client / Frontend
              │
       ┌──────┴──────┐
       ▼             ▼
- SATUSEHAT      MongoDB Lokal
+ SATUSEHAT      SQLite Lokal
  FHIR R4 API    (riwayat & query)
- (Sandbox)
+ (Sandbox)      data/satusehat.db
 ```
 
 ### Prinsip Alur Request
@@ -53,13 +53,13 @@ Request → Route → Controller → Service(s) → Response
                                    │
                           ┌────────┴────────┐
                           ▼                 ▼
-                    SATUSEHAT API      MongoDB (write)
+                    SATUSEHAT API      SQLite (write)
 ```
 
 - **Route** — hanya mendaftarkan path dan method HTTP.
 - **Controller** — validasi input, panggil service, kirim respons.
 - **Service** — seluruh logika bisnis dan panggilan API eksternal.
-- **MongoDB** — hanya ditulis setelah SATUSEHAT berhasil (dual-write).
+- **SQLite** — hanya ditulis setelah SATUSEHAT berhasil (dual-write). File DB di `server/data/satusehat.db`, dibuat otomatis.
 
 ---
 
@@ -78,7 +78,7 @@ POST /api/v1/register
         ├─[3] GET IHS Number Dokter berdasarkan NIK
         ├─[4] POST Location → dapat locationId
         ├─[5] POST Encounter → dapat encounterId ✅
-        └─[6] Simpan ke MongoDB lokal (dual-write)
+        └─[6] Simpan ke SQLite lokal (dual-write)
 ```
 
 **Cocok untuk:** frontend form pendaftaran sederhana, demo, atau pengujian cepat.
@@ -107,7 +107,7 @@ Langkah 4   POST /api/v1/satusehat/encounter
                  → Dapat: encounterId ✅
 ```
 
-> **Catatan:** Opsi B **tidak** menyimpan ke MongoDB lokal. Hanya Opsi A (`POST /register`) yang melakukan dual-write.
+> **Catatan:** Opsi B **tidak** menyimpan ke SQLite lokal. Hanya Opsi A (`POST /register`) yang melakukan dual-write.
 
 ---
 
@@ -221,12 +221,43 @@ GET /api/v1/satusehat/patient/:nik
 
 ---
 
-### 4.4 Dokter (Practitioner)
+### 4.4 Dokter (Practitioner) - DB Lokal
 
-Mencari data dokter di SATUSEHAT berdasarkan NIK.
+Mengambil data dokter dari database lokal SQLite (berasal dari Seeder).
+Digunakan di frontend untuk dropdown/search (tidak perlu ketik NIK manual).
 
 ```
-GET /api/v1/satusehat/practitioner/:nik
+GET /api/v1/practitioners
+GET /api/v1/practitioners?search=nama
+```
+
+| Parameter | Tipe     | Keterangan          |
+|-----------|----------|---------------------|
+| `search`  | `string` | (Opsional) Filter pencarian berdasarkan nama (case-insensitive) |
+
+**Respons `200 OK`:**
+```json
+{
+  "success": true,
+  "message": "Daftar practitioner berhasil diambil",
+  "data": [
+    {
+      "nik": "3217040109800006",
+      "name": "dr. Olivia Kirana, Sp.OG",
+      "ihsNumber": "10002074224"
+    }
+  ]
+}
+```
+
+---
+
+### 4.5 Detail Dokter (Practitioner) - DB Lokal
+
+Mencari detail dokter berdasarkan NIK di database lokal.
+
+```
+GET /api/v1/practitioners/:nik
 ```
 
 | Parameter | Tipe     | Keterangan          |
@@ -237,17 +268,42 @@ GET /api/v1/satusehat/practitioner/:nik
 ```json
 {
   "success": true,
-  "message": "Data dokter ditemukan",
+  "message": "Data practitioner ditemukan",
   "data": {
-    "ihsNumber": "N10000001",
-    "name": "dr. Siti Rahayu"
+    "nik": "3217040109800006",
+    "name": "dr. Olivia Kirana, Sp.OG",
+    "ihsNumber": "10002074224"
   }
 }
 ```
 
 ---
 
-### 4.5 Lokasi (Location)
+### 4.6 Lokasi (Location) - DB Lokal
+
+Mengambil daftar lokasi dari database lokal SQLite.
+
+```
+GET /api/v1/locations
+```
+
+**Respons `200 OK`:**
+```json
+{
+  "success": true,
+  "message": "Daftar location berhasil diambil",
+  "data": [
+    {
+      "locationId": "a9f3c2d1-5e4b-4a7f-b123-8c0e1d2f3a4b",
+      "name": "Ruang Poli Umum"
+    }
+  ]
+}
+```
+
+---
+
+### 4.7 Lokasi (Location) SATUSEHAT
 
 Membuat resource Location di SATUSEHAT FHIR R4. Jika Location dengan nama yang sama sudah ada untuk organisasi ini, backend otomatis **menggunakan ID yang sudah ada** (get-or-create, tidak duplikat).
 
@@ -281,7 +337,7 @@ Content-Type: application/json
 
 ---
 
-### 4.6 Encounter
+### 4.8 Encounter
 
 Mendaftarkan kunjungan pasien ke SATUSEHAT FHIR R4 dengan:
 - **Status:** `arrived` (pasien baru tiba)
@@ -332,7 +388,7 @@ Content-Type: application/json
 
 ### 4.7 Registrasi Penuh — Main Endpoint
 
-⭐ **Endpoint utama.** Mengeksekusi seluruh alur 4 langkah (Auth → Patient → Practitioner → Location → Encounter) dalam satu request, lalu menyimpan hasilnya ke MongoDB lokal.
+⭐ **Endpoint utama.** Mengeksekusi seluruh alur 4 langkah (Auth → Patient → Practitioner → Location → Encounter) dalam satu request, lalu menyimpan hasilnya ke SQLite lokal (`data/satusehat.db`).
 
 ```
 POST /api/v1/register
@@ -352,7 +408,8 @@ Content-Type: application/json
 |-------------------|----------|-------|-----------------------|
 | `patientNik`      | `string` | Tidak | `"1000000000000001"` |
 | `practitionerNik` | `string` | Tidak | `"1000000000000002"` |
-| `locationName`    | `string` | Tidak | `"Ruang Poli Umum"`  |
+| `locationId`      | `string` | Tidak | `null`                |
+| `locationName`    | `string` | Tidak | `"Ruang Poli Umum"`   |
 
 **Respons `201 Created`:**
 ```json
@@ -387,7 +444,7 @@ Content-Type: application/json
 
 ### 4.8 Riwayat Encounter (Database Lokal)
 
-Endpoint ini membaca data dari **MongoDB lokal** — bukan dari SATUSEHAT. Data tersedia setelah `POST /api/v1/register` berhasil.
+Endpoint ini membaca data dari **SQLite lokal** (`server/data/satusehat.db`) — bukan dari SATUSEHAT. Data tersedia setelah `POST /api/v1/register` berhasil.
 
 #### List Riwayat
 
@@ -416,7 +473,7 @@ GET /api/v1/encounters?patientNik=1000000000000001&page=1&limit=5
   "data": {
     "encounters": [
       {
-        "_id": "665e1a2b3c4d5e6f7a8b9c0d",
+        "id": 1,
         "patientNik": "1000000000000001",
         "patientIhsNumber": "100000030003",
         "patientName": "Budi Santoso",
@@ -428,7 +485,8 @@ GET /api/v1/encounters?patientNik=1000000000000001&page=1&limit=5
         "encounterId": "7f3a1c2d-4e5b-6f7a-8b9c-0d1e2f3a4b5c",
         "encounterStatus": "arrived",
         "registeredAt": "2026-06-03T14:30:00.000Z",
-        "createdAt": "2026-06-03T14:30:01.000Z"
+        "createdAt": "2026-06-03T14:30:01.000Z",
+        "updatedAt": "2026-06-03T14:30:01.000Z"
       }
     ],
     "pagination": {
@@ -466,31 +524,43 @@ POST /api/v1/register
         │
         ├─► SATUSEHAT FHIR R4  ──► encounterId diterima ✅
         │
-        └─► MongoDB Lokal ──────► EncounterRecord tersimpan 💾
+        └─► SQLite Lokal ───────► EncounterRecord tersimpan 💾
+              (data/satusehat.db)   dibuat otomatis saat startup
 ```
 
 **Aturan dual-write:**
-- Data **hanya disimpan ke MongoDB** jika SATUSEHAT berhasil mengembalikan `encounterId`.
+- Data **hanya disimpan ke SQLite** jika SATUSEHAT berhasil mengembalikan `encounterId`.
 - Jika SATUSEHAT gagal → tidak ada yang disimpan (konsistensi terjaga).
-- Jika MongoDB gagal setelah SATUSEHAT berhasil → **response tetap sukses**, tetapi server akan log warning `[DB] Gagal menyimpan...`. SATUSEHAT tetap menjadi sumber kebenaran.
+- Jika SQLite gagal setelah SATUSEHAT berhasil → **response tetap sukses**, tetapi server akan log warning `[DB] Gagal menyimpan...`. SATUSEHAT tetap menjadi sumber kebenaran.
 
-### Schema MongoDB (`EncounterRecord`)
+### Lokasi File Database
 
-| Field                   | Tipe     | Keterangan                          |
-|-------------------------|----------|-------------------------------------|
-| `patientNik`            | String   | NIK pasien                          |
-| `patientIhsNumber`      | String   | IHS Number pasien (dari SATUSEHAT)  |
-| `patientName`           | String   | Nama pasien                         |
-| `practitionerNik`       | String   | NIK dokter                          |
-| `practitionerIhsNumber` | String   | IHS Number dokter (dari SATUSEHAT)  |
-| `practitionerName`      | String   | Nama dokter                         |
-| `locationId`            | String   | Location ID (dari SATUSEHAT)        |
-| `locationName`          | String   | Nama lokasi/ruangan                 |
-| `encounterId`           | String   | Encounter ID (dari SATUSEHAT), unique |
-| `encounterStatus`       | String   | Status kunjungan (default: `arrived`) |
-| `registeredAt`          | Date     | Waktu pendaftaran dieksekusi        |
-| `createdAt`             | Date     | Waktu record dibuat (auto)          |
-| `updatedAt`             | Date     | Waktu record diupdate (auto)        |
+```
+server/
+└── data/
+    └── satusehat.db    ← dibuat otomatis, masuk .gitignore
+```
+
+File ini **tidak perlu dibuat secara manual** — Sequelize akan membuatnya beserta tabel `encounter_records` saat server pertama kali dijalankan.
+
+### Schema Tabel SQLite (`encounter_records`)
+
+| Kolom                   | Tipe     | Constraint | Keterangan                          |
+|-------------------------|----------|------------|-------------------------------------|
+| `id`                    | INTEGER  | PK, Auto   | Primary key auto-increment          |
+| `patientNik`            | STRING   | NOT NULL   | NIK pasien                          |
+| `patientIhsNumber`      | STRING   | NOT NULL   | IHS Number pasien (dari SATUSEHAT)  |
+| `patientName`           | STRING   | NOT NULL   | Nama pasien                         |
+| `practitionerNik`       | STRING   | NOT NULL   | NIK dokter                          |
+| `practitionerIhsNumber` | STRING   | NOT NULL   | IHS Number dokter (dari SATUSEHAT)  |
+| `practitionerName`      | STRING   | NOT NULL   | Nama dokter                         |
+| `locationId`            | STRING   | NOT NULL   | Location ID (dari SATUSEHAT)        |
+| `locationName`          | STRING   | NOT NULL   | Nama lokasi/ruangan                 |
+| `encounterId`           | STRING   | NOT NULL, UNIQUE | Encounter ID (dari SATUSEHAT)  |
+| `encounterStatus`       | STRING   | —          | Status kunjungan (default: `arrived`) |
+| `registeredAt`          | DATE     | —          | Waktu pendaftaran dieksekusi        |
+| `createdAt`             | DATE     | Auto       | Waktu record dibuat (auto)          |
+| `updatedAt`             | DATE     | Auto       | Waktu record diupdate (auto)        |
 
 ---
 
@@ -532,7 +602,7 @@ cp .env.example .env
 |---------------------------|---------------------------------------------|--------------|
 | `PORT`                    | Port server                                 | `5000` |
 | `NODE_ENV`                | Mode environment                            | `development` |
-| `MONGO_URI`               | URI koneksi MongoDB lokal                   | `mongodb://localhost:27017/satusehat` |
+| `DB_PATH`                 | Path file SQLite (opsional, ada default)    | `./data/satusehat.db` |
 | `SATUSEHAT_BASE_URL`      | Base URL API SATUSEHAT                      | `https://api-satusehat-stg.dto.kemkes.go.id` |
 | `SATUSEHAT_ORG_ID`        | ID Organisasi Fasyankes                     | `10000004` |
 | `SATUSEHAT_CLIENT_ID`     | Client ID dari portal developer SATUSEHAT   | (dari portal) |
@@ -545,18 +615,7 @@ cp .env.example .env
 ### Prasyarat
 
 1. **Node.js** v18+ — [nodejs.org](https://nodejs.org)
-2. **MongoDB Community Server** (untuk database lokal)
-   - Download: [mongodb.com/try/download/community](https://www.mongodb.com/try/download/community)
-   - Setelah install, jalankan service MongoDB:
-     ```powershell
-     # Windows — jalankan sebagai Administrator
-     net start MongoDB
-     ```
-   - Verifikasi berjalan:
-     ```powershell
-     mongosh --eval "db.adminCommand('ping')"
-     # Output: { ok: 1 }
-     ```
+2. **Tidak ada** — SQLite sudah disertakan sebagai dependensi npm, tidak perlu install service database terpisah.
 
 ### Install Dependensi
 
@@ -584,9 +643,11 @@ curl http://localhost:5000/api/v1/health
 ### Output Console yang Diharapkan
 
 ```
-[DB] MongoDB terhubung: mongodb://localhost:27017/satusehat
+[DB] SQLite siap: ./data/satusehat.db
 Server is running on port 5000 in development mode.
 ```
+
+> File `server/data/satusehat.db` dibuat otomatis pada startup pertama. Folder `data/` sudah masuk `.gitignore`.
 
 ---
 

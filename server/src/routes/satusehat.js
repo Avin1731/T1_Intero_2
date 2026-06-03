@@ -3,7 +3,6 @@ const router = express.Router();
 const {
   getToken,
   getPatient,
-  getPractitioner,
   postLocation,
   postEncounter,
   debugPractitioner,
@@ -12,7 +11,7 @@ const {
 
 router.get('/token', getToken);
 router.get('/patient/:nik', getPatient);
-router.get('/practitioner/:nik', getPractitioner);
+// getPractitioner dihapus, pakai DB lokal (GET /api/v1/practitioners/:nik)
 router.post('/location', postLocation);
 router.post('/encounter', postEncounter);
 
