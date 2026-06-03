@@ -2,6 +2,7 @@ const { getPatientByNik } = require('./patientService');
 const { getPractitionerByNik } = require('./practitionerService');
 const { createLocation } = require('./locationService');
 const { createEncounter } = require('./encounterService');
+const EncounterRecord = require('../models/EncounterRecord');
 
 const DUMMY_PATIENT_NIK = '1000000000000001';
 const DUMMY_PRACTITIONER_NIK = '1000000000000002';
@@ -9,6 +10,7 @@ const DUMMY_PRACTITIONER_NIK = '1000000000000002';
 /**
  * Orkestrasi pendaftaran pasien rawat jalan sesuai standar SATUSEHAT.
  * Langkah: Auth → Cari IHS Pasien → Cari IHS Dokter → Buat Location → Buat Encounter
+ * Setelah Encounter berhasil dibuat di SATUSEHAT, data disimpan ke DB lokal (dual-write).
  *
  * @param {object} options
  * @param {string} [options.patientNik]       - NIK pasien (default: dummy)
@@ -38,6 +40,31 @@ const registerPatient = async ({
     locationName: locationData.locationName,
   });
 
+  const registeredAt = new Date();
+
+  // ── Dual-Write: Simpan ke DB lokal setelah SATUSEHAT berhasil ─────
+  // Jika DB gagal, log warning saja — jangan batalkan response sukses.
+  // SATUSEHAT adalah sumber kebenaran; DB lokal hanya untuk riwayat & query cepat.
+  try {
+    await EncounterRecord.create({
+      patientNik,
+      patientIhsNumber: patientData.ihsNumber,
+      patientName: patientData.name,
+      practitionerNik,
+      practitionerIhsNumber: practitionerData.ihsNumber,
+      practitionerName: practitionerData.name,
+      locationId: locationData.locationId,
+      locationName: locationData.locationName,
+      encounterId: encounterData.encounterId,
+      encounterStatus: encounterData.status,
+      registeredAt,
+    });
+    console.log(`[DB] Encounter ${encounterData.encounterId} tersimpan ke database lokal.`);
+  } catch (dbErr) {
+    console.warn(`[DB] Gagal menyimpan encounter ke database: ${dbErr.message}`);
+  }
+  // ─────────────────────────────────────────────────────────────────
+
   return {
     patient: {
       nik: patientNik,
@@ -56,9 +83,10 @@ const registerPatient = async ({
     encounter: {
       id: encounterData.encounterId,
       status: encounterData.status,
-      timestamp: new Date().toISOString(),
+      timestamp: registeredAt.toISOString(),
     },
   };
 };
 
 module.exports = { registerPatient };
+
