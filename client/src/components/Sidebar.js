@@ -7,8 +7,8 @@ import { useTheme } from '../context/ThemeContext';
 
 const navItems = [
   { label: 'Dashboard', path: '/dashboard' },
-  { label: 'Registrasi', path: '/dashboard' },
-  { label: 'Booking', path: '/dashboard' },
+  { label: 'Registrasi', path: '/dashboard/intake' },
+  { label: 'Booking', path: '/dashboard/404' },
 ];
 
 export default function Sidebar({ userName = 'admin', onLogout }) {
@@ -30,7 +30,7 @@ export default function Sidebar({ userName = 'admin', onLogout }) {
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-lg font-semibold text-white shadow-md"
             style={{ backgroundColor: colors.primary }}
           >
-            K
+            🩺
           </div>
           <div className="min-w-0">
             <p className="text-[10px] font-medium uppercase tracking-[0.2em]" style={{ color: colors.accent }}>
@@ -44,7 +44,7 @@ export default function Sidebar({ userName = 'admin', onLogout }) {
 
         <nav className="space-y-1.5">
           {navItems.map((item) => {
-            const isActive = pathname === item.path && item.label === 'Dashboard';
+            const isActive = pathname === item.path;
             return (
               <Link
                 key={item.label}
