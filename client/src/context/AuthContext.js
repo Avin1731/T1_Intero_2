@@ -37,8 +37,14 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    refreshUser();
+    // Defer refreshUser to avoid triggering setState synchronously during the effect flush
+    const t = window.setTimeout(() => {
+      refreshUser();
+    }, 0);
+
+    return () => window.clearTimeout(t);
   }, [refreshUser]);
+
 
   const login = async (username, password) => {
     setLoading(true);

@@ -21,10 +21,16 @@ export function ThemeProvider({ children }) {
 
   useLayoutEffect(() => {
     const initialDark = resolveIsDark();
-    setIsDark(initialDark);
-    applyThemeToDocument(initialDark);
-    setReady(true);
+    // Avoid calling setState synchronously in an effect body.
+    const t = window.setTimeout(() => {
+      setIsDark(initialDark);
+      applyThemeToDocument(initialDark);
+      setReady(true);
+    }, 0);
+
+    return () => window.clearTimeout(t);
   }, []);
+
 
   useLayoutEffect(() => {
     if (!ready) return;
