@@ -15,10 +15,11 @@ const register = async (req, res, next) => {
     const {
       patientNik,
       practitionerNik,
+      locationId,
       locationName,
     } = req.body;
 
-    const result = await registerPatient({ patientNik, practitionerNik, locationName });
+    const result = await registerPatient({ patientNik, practitionerNik, locationId, locationName });
     return sendSuccess(res, result, 'Pendaftaran pasien berhasil', 201);
   } catch (err) {
     next(err);
@@ -41,17 +42,6 @@ const getPatient = async (req, res, next) => {
     const { nik } = req.params;
     const data = await getPatientByNik(nik);
     return sendSuccess(res, data, 'Data pasien ditemukan');
-  } catch (err) {
-    next(err);
-  }
-};
-
-// GET /api/v1/satusehat/practitioner/:nik — Cari dokter berdasarkan NIK
-const getPractitioner = async (req, res, next) => {
-  try {
-    const { nik } = req.params;
-    const data = await getPractitionerByNik(nik);
-    return sendSuccess(res, data, 'Data dokter ditemukan');
   } catch (err) {
     next(err);
   }
@@ -150,7 +140,6 @@ module.exports = {
   register,
   getToken,
   getPatient,
-  getPractitioner,
   postLocation,
   getLocationsList,
   postEncounter,
