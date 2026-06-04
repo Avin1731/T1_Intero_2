@@ -55,10 +55,14 @@ const postLocation = async (req, res, next) => {
     if (req.body && req.body.resourceType === 'Location') {
       params = req.body;
     } else {
-      const { locationName, name, status, description, identifier } = req.body;
+      const { locationName, name, status, description, identifier, identifierValue: rawIdentifierValue } = req.body;
 
       let identifierValue;
-      if (identifier && Array.isArray(identifier) && identifier.length > 0) {
+      // Terima format string langsung (dari client modal)
+      if (rawIdentifierValue) {
+        identifierValue = rawIdentifierValue;
+      // Atau format array FHIR: identifier: [{ value: "..." }]
+      } else if (identifier && Array.isArray(identifier) && identifier.length > 0) {
         identifierValue = identifier[0].value;
       }
 
