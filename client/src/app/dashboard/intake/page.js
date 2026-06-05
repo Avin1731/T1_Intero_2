@@ -79,7 +79,10 @@ function IntakeContent() {
       try {
         const pracRes = await api.get('/v1/practitioners');
         if (pracRes && pracRes.data) {
-          setPractitioners(pracRes.data);
+          const list = Array.isArray(pracRes.data.data)
+            ? pracRes.data.data
+            : (Array.isArray(pracRes.data) ? pracRes.data : []);
+          setPractitioners(list);
         }
 
         const locRes = await api.get('/v1/locations');
