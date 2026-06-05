@@ -13,3 +13,6 @@ node_modules/
 
 # pnpm debug logs
 .pnpm-debug.log
+
+# Local backend reference documentation
+LOCAL_BE_REFERENCE.md
