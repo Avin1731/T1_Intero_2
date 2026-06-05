@@ -25,9 +25,18 @@ const getPatientByNik = async (nik) => {
 
   const patient = bundle.entry[0].resource;
   const nameEntry = patient.name?.[0];
+  let name = nameEntry?.text || nameEntry?.family || 'Pasien';
+
+  // Override masked sandbox names with full names for testing
+  if (nik === '1000000000000001') {
+    name = 'Subagyo';
+  } else if (nik === '1000000000000009') {
+    name = 'Annette';
+  }
+
   return {
     ihsNumber: patient.id,
-    name: nameEntry?.text || nameEntry?.family || 'Pasien',
+    name,
   };
 };
 

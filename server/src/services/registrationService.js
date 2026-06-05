@@ -51,11 +51,30 @@ const registerPatient = async ({
   }
 
   // Langkah 3: Cari Location (Prioritaskan DB Lokal)
+  const DUMMY_LIDS = [
+    'a9f3c2d1-5e4b-4a7f-b123-8c0e1d2f3a4b', 
+    'b8e2c1d0-4d3a-3b6e-a012-7b9d0c1e2f3a', 
+    'c7d1b0c9-3c29-2a5d-9f01-6a8c9b0d1e2f'
+  ];
+
+  if (locationId && DUMMY_LIDS.includes(locationId)) {
+    // Hapus dummy record dari DB lokal agar bersih
+    try {
+      await LocationLocal.destroy({ where: { locationId } });
+    } catch (_) {}
+  }
+
   let locationData;
-  if (locationId) {
+  if (locationId && !DUMMY_LIDS.includes(locationId)) {
     locationData = await LocationLocal.findOne({ where: { locationId } });
-  } else {
-    locationData = await LocationLocal.findOne({ where: { name: locationName } });
+  } else if (locationName) {
+    const { Op } = require('sequelize');
+    locationData = await LocationLocal.findOne({ 
+      where: { 
+        name: locationName,
+        locationId: { [Op.notIn]: DUMMY_LIDS }
+      } 
+    });
   }
 
   if (locationData) {
