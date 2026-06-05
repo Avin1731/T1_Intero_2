@@ -14,9 +14,18 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-6 text-foreground">
+    <div
+      className="relative flex min-h-screen items-center justify-center px-6 text-foreground"
+      style={{
+        backgroundImage: "url('/bg-landing.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      <div className="absolute inset-0 bg-black/60" />
       <div
-        className="w-full max-w-3xl rounded-[40px] border p-10 shadow-2xl backdrop-blur-xl"
+        className="relative z-10 w-full max-w-3xl rounded-[40px] border p-10 shadow-2xl backdrop-blur-xl"
         style={{
           backgroundColor: colors.cardBg,
           borderColor: colors.accent,
