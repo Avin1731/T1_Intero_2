@@ -47,9 +47,9 @@ function EncounterContent() {
       }
 
       const res = await api.get('/v1/encounters', { params });
-      if (res.data && res.data.data) {
-        setEncounters(res.data.data.encounters || []);
-        setPagination(res.data.data.pagination || {
+      if (res && res.data) {
+        setEncounters(res.data.encounters || []);
+        setPagination(res.data.pagination || {
           total: 0,
           page: pageNum,
           limit: 8,

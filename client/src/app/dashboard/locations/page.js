@@ -23,7 +23,7 @@ function AddLocationModal({ onClose, onSuccess, colors, isDark }) {
         name: name.trim(),
         description: name.trim(),
       });
-      const newLocationId = result?.data?.data?.locationId;
+      const newLocationId = result?.data?.locationId;
       onSuccess({
         id: newLocationId || `temp-${Date.now()}`,
         name: name.trim(),

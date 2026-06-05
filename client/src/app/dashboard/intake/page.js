@@ -78,8 +78,8 @@ function IntakeContent() {
       setLoadingLocations(true);
       try {
         const pracRes = await api.get('/v1/practitioners');
-        if (pracRes.data && pracRes.data.data) {
-          setPractitioners(pracRes.data.data);
+        if (pracRes && pracRes.data) {
+          setPractitioners(pracRes.data);
         }
 
         const locRes = await api.get('/v1/satusehat/location');
